@@ -1,0 +1,123 @@
+name: Shared PR Analysis
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  security-analysis:
+    name: Security & Quality Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout calling repository
+        uses: actions/checkout@v4
+
+      - name: Checkout central workflow repository
+        uses: actions/checkout@v4
+        with:
+          repository: bedy90/Shared-Workflow
+          path: .central-workflow
+          ref: dev # Ou main selon votre branche par défaut
+
+      - name: Use Node 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+
+      - name: Install mustache
+        run: npm install mustache
+
+      - name: Run Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "json"
+          output: "trivy-report.json"
+          exit-code: "0"
+          ignore-unfixed: true
+          severity: "CRITICAL,HIGH"
+
+      - name: Post Trivy Comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const trivyScript = require('./.central-workflow/.github/scripts/trivy.cjs');
+            await trivyScript({ 
+              github, 
+              context, 
+              templatePath: './.central-workflow/.github/template/trivy.md' 
+            });
+
+      - name: Check Outdated Packages
+        id: outdated
+        run: |
+          npm outdated --json > outdated.json || true
+        continue-on-error: true
+
+      - name: Post Outdated Comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const outdatedScript = require('./.central-workflow/.github/scripts/outdated.cjs');
+            await outdatedScript({ 
+              github, 
+              context, 
+              templatePath: './.central-workflow/.github/template/outdated.md' 
+            });
+
+      - name: Run NPM Audit
+        id: audit
+        run: |
+          npm audit --json > audit-result.json || true
+        continue-on-error: true
+
+      - name: Post Audit Comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const auditScript = require('./.central-workflow/.github/scripts/audit.cjs');
+            await auditScript({ 
+              github, 
+              context, 
+              templatePath: './.central-workflow/.github/template/audit.md' 
+            });
+
+      - name: Check if Linter is defined
+        id: check_linter
+        run: |
+          if [ -f "package.json" ] && grep -q "\"eslint\":" package.json; then
+            echo "has_eslint=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_eslint=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Linter Check
+        if: steps.check_linter.outputs.has_eslint == 'true'
+        id: eslint_check
+        run: |
+          npx eslint . -f json > eslint-report.json || true
+        continue-on-error: true
+
+      - name: Post ESLint Comment
+        if: steps.check_linter.outputs.has_eslint == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const eslintScript = require('./.central-workflow/.github/scripts/eslint.cjs');
+            await eslintScript({ 
+              github, 
+              context, 
+              templatePath: './.central-workflow/.github/template/eslint.md' 
+            });
