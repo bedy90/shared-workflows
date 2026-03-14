@@ -27,12 +27,12 @@ name: Global Analysis
 on:
   pull_request:
     # définir la liste des branche ciblés
-    branches: [main, dev]
+    branches: [main, dev, prod]
 
 jobs:
   security-and-quality:
     # Remplacez [NOM_ORG] par le nom de votre organisation
-    uses: bedy90/Shared-Workflow/.github/workflows/PR Analysis.yml@dev
+    uses: bedy90/Shared-Workflow/.github/workflows/PR-Analysis.yml@dev
     permissions:
       contents: read
       pull-requests: write
