@@ -2,6 +2,12 @@ name: Shared PR Analysis
 
 on:
   workflow_call:
+    inputs:
+      workflow_token:
+        description: "GITHUB_TOKEN ou PAT pour accéder au dépôt partagé"
+        required: false
+        type: string
+        default: ""
   workflow_dispatch:
 
 permissions:
@@ -22,7 +28,8 @@ jobs:
         with:
           repository: bedy90/shared-workflows
           path: .central-workflow
-          ref: dev # Ou main selon votre branche par défaut
+          ref: dev
+          token: ${{ inputs.workflow_token || secrets.GITHUB_TOKEN }}
 
       - name: Use Node 22.x
         uses: actions/setup-node@v4

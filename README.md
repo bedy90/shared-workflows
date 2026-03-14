@@ -21,6 +21,8 @@ Analyse de sécurité et de qualité du code sur les Pull Requests.
 
 Pour utiliser ce workflow dans un autre dépôt, créez un fichier `.github/workflows/reusable-analysis.yml` dans votre projet cible :
 
+### Version Publique
+
 ```yaml
 name: Global Analysis
 
@@ -33,6 +35,30 @@ jobs:
   security-and-quality:
     # Remplacez [NOM_ORG] par le nom de votre organisation
     uses: bedy90/shared-workflows/.github/workflows/pr-analysis.yml@dev
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+    secrets: inherit
+```
+
+### Version GH_PAT_TOKEN
+
+```yaml
+name: Global Analysis
+
+on:
+  pull_request:
+    # définir la liste des branche ciblés
+    branches: [main, dev, prod]
+
+jobs:
+  security-and-quality:
+    # Remplacez [NOM_ORG] par le nom de votre organisation
+    uses: bedy90/shared-workflows/.github/workflows/pr-analysis.yml@dev
+    with:
+      # Optionnel : Obligatoire si le dépôt shared-workflows est PRIVÉ
+      workflow_token: ${{ secrets.GH_PAT_TOKEN }}
     permissions:
       contents: read
       pull-requests: write
@@ -63,3 +89,16 @@ Par défaut, un dépôt privé ne peut pas être "appelé" par un autre. Vous de
 - Actions -> General.
 - Section **"Access"**.
 - Cochez **"Accessible from repositories in the same organization"**.
+
+### 🔐 Gestion de l'accès (Dépôt Privé)
+
+Si ce dépôt est **Privé**, GitHub Actions ne pourra pas le cloner depuis un autre dépôt sans authentification.
+
+**Deux solutions :**
+
+1. **Passer le dépôt en PUBLIC** (Recommandé si les scripts ne sont pas sensibles). C'est la solution la plus simple.
+
+2. **Utiliser un PAT (Personal Access Token)** :
+   - Créez un PAT (classic) avec le scope `repo`.
+   - Ajoutez-le comme **Secret** dans le dépôt projet (`Settings > Secrets > Actions`) sous le nom `GH_PAT_TOKEN`.
+   - Passez-le au workflow via l'input `workflow_token` (voir exemple ci-dessus).
