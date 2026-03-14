@@ -20,7 +20,7 @@ jobs:
       - name: Checkout central workflow repository
         uses: actions/checkout@v4
         with:
-          repository: bedy90/Shared-Workflow
+          repository: bedy90/shared-workflows
           path: .central-workflow
           ref: dev # Ou main selon votre branche par défaut
 

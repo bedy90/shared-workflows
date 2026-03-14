@@ -32,7 +32,7 @@ on:
 jobs:
   security-and-quality:
     # Remplacez [NOM_ORG] par le nom de votre organisation
-    uses: bedy90/Shared-Workflow/.github/workflows/PR-Analysis.yml@dev
+    uses: bedy90/shared-workflows/.github/workflows/pr-analysis.yml@dev
     permissions:
       contents: read
       pull-requests: write
@@ -42,7 +42,7 @@ jobs:
 
 ### ⚙️ Pré-requis
 
-- Le dépôt central `Shared-Workflow` doit être configuré pour autoriser l'accès aux autres dépôts de l'organisation (**Settings > Actions > General > Access**).
+- Le dépôt central `shared-workflows` doit être configuré pour autoriser l'accès aux autres dépôts de l'organisation (**Settings > Actions > General > Access**).
 - Le projet cible doit avoir un fichier `package.json`.
 - Pour ESLint, le script `eslint` doit être présent dans les `scripts` du `package.json`.
 
