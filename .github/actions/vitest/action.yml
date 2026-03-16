@@ -1,0 +1,30 @@
+name: "Module ViTest"
+description: "Exécute les tests ViTest et l'analyse des résultats"
+
+inputs:
+  central_path:
+    description: "Chemin vers le dépôt shared-workflows"
+    required: true
+  workflow_token:
+    description: "Token GitHub"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: ViTest Execution
+      shell: bash
+      run: npx vitest run --reporter=json --outputFile=vitest-report.json || true
+
+    - name: ViTest Analysis
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.workflow_token || github.token }}
+        script: |
+          const vitestScript = require(`${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/scripts/vitest.cjs`);
+          await vitestScript({ 
+            github, 
+            context, 
+            templatePath: `${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/template/vitest.md` 
+          });

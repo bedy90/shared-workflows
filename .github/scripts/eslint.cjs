@@ -1,10 +1,8 @@
 const fs = require('fs');
-const Mustache = require('mustache');
+const postComment = require('./github-comment-helper.cjs');
 
 module.exports = async ({ github, context, templatePath }) => {
-    const IDENTIFIER = '<!-- eslint-check-comment -->';
     const reportPath = 'eslint-report.json';
-    const finalTemplatePath = templatePath || '.github/template/eslint.md';
 
     if (!fs.existsSync(reportPath)) {
         console.log('Aucun rapport ESLint trouvé.');
@@ -51,30 +49,12 @@ module.exports = async ({ github, context, templatePath }) => {
         remainingCount: totalIssues - 50,
     };
 
-    const template = fs.readFileSync(finalTemplatePath, 'utf8');
-    const message = IDENTIFIER + '\n' + Mustache.render(template, data);
-
-    const { data: comments } = await github.rest.issues.listComments({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        issue_number: context.issue.number,
+    await postComment({
+        github,
+        context,
+        templatePath,
+        data,
+        identifier: '<!-- eslint-check-comment -->',
+        defaultTemplatePath: '.github/template/eslint.md'
     });
-
-    const existingComment = comments.find(c => c.body.includes(IDENTIFIER));
-
-    if (existingComment) {
-        await github.rest.issues.updateComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            comment_id: existingComment.id,
-            body: message,
-        });
-    } else {
-        await github.rest.issues.createComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-            body: message,
-        });
-    }
 };

@@ -1,0 +1,24 @@
+name: Commit Lint Check
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  commit-lint:
+    name: Commit Message Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout calling repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Dummy Commit Lint (Placeholder)
+        run: |
+          echo "Vérification des messages de commit..."
+          # Ici on pourrait ajouter 'npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }}'
+          echo "Standard non défini pour le moment, cette étape est informative."

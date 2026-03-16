@@ -1,0 +1,55 @@
+name: Linter Check
+
+on:
+  workflow_call:
+    inputs:
+      workflow_token:
+        description: "GITHUB_TOKEN ou PAT pour accéder au dépôt partagé"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  linter-analysis:
+    name: ESLint Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout calling repository
+        uses: actions/checkout@v4
+
+      - name: Checkout central workflow repository
+        uses: actions/checkout@v4
+        with:
+          repository: bedy90/shared-workflows
+          path: .central-workflow
+          ref: dev
+          token: ${{ inputs.workflow_token || secrets.GITHUB_TOKEN }}
+
+      - name: Use Node 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+
+      - name: Check if Linter is defined
+        id: check_linter
+        run: |
+          if [ -f "package.json" ] && grep -q "\"eslint\":" package.json; then
+            echo "has_eslint=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_eslint=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Linter Analysis
+        uses: ./.central-workflow/.github/actions/quality
+        with:
+          central_path: ".central-workflow"
+          workflow_token: ${{ inputs.workflow_token || secrets.GITHUB_TOKEN }}
+          has_eslint: ${{ steps.check_linter.outputs.has_eslint }}

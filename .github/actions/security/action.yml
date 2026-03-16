@@ -1,0 +1,59 @@
+name: "Module Sécurité"
+description: "Exécute Trivy, NPM Audit et Gitleaks"
+
+inputs:
+  central_path:
+    description: "Chemin vers le dépôt shared-workflows"
+    required: true
+  workflow_token:
+    description: "Token GitHub"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run Trivy
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: "fs"
+        scan-ref: "."
+        format: "json"
+        output: "trivy-report.json"
+        exit-code: "0"
+        ignore-unfixed: true
+        severity: "CRITICAL,HIGH"
+
+    - name: Post Trivy Comment
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.workflow_token || github.token }}
+        script: |
+          const trivyScript = require(`${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/scripts/trivy.cjs`);
+          await trivyScript({ 
+            github, 
+            context, 
+            templatePath: `${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/template/trivy.md` 
+          });
+
+    - name: Run NPM Audit
+      shell: bash
+      run: npm audit --json > audit-result.json || true
+
+    - name: Post Audit Comment
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.workflow_token || github.token }}
+        script: |
+          const auditScript = require(`${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/scripts/audit.cjs`);
+          await auditScript({ 
+            github, 
+            context, 
+            templatePath: `${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/template/audit.md` 
+          });
+
+    - name: Secret Scan (Gitleaks)
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ inputs.workflow_token || github.token }}
+      continue-on-error: true

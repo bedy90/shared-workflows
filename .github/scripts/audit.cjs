@@ -1,5 +1,5 @@
 const fs = require('fs');
-const Mustache = require('mustache');
+const postComment = require('./github-comment-helper.cjs');
 
 function groupBySeverity(vulnerabilities) {
   const severities = {
@@ -103,37 +103,15 @@ module.exports = async ({ github, context, templatePath }) => {
     ].filter(g => g.vulnerabilities.length > 0);
   }
 
-  const finalTemplatePath = templatePath || '.github/template/audit.md';
-  const templateRaw = fs.readFileSync(finalTemplatePath, 'utf8');
-
-  const IDENTIFIER = '<!-- audit-comment -->';
-  const commentBody = IDENTIFIER + '\n' + Mustache.render(templateRaw, {
-    grouped: groupedArray,
-    noVulnerabilities: noVulnerabilities,
+  await postComment({
+    github,
+    context,
+    templatePath,
+    data: {
+      grouped: groupedArray,
+      noVulnerabilities: noVulnerabilities,
+    },
+    identifier: '<!-- audit-comment -->',
+    defaultTemplatePath: '.github/template/audit.md'
   });
-
-  // Trouver un commentaire existant du bot
-  const { data: comments } = await github.rest.issues.listComments({
-    owner: context.repo.owner,
-    repo: context.repo.repo,
-    issue_number: context.issue.number,
-  });
-
-  const commentToUpdate = comments.find(c => c.body.includes(IDENTIFIER));
-
-  if (commentToUpdate) {
-    await github.rest.issues.updateComment({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      comment_id: commentToUpdate.id,
-      body: commentBody,
-    });
-  } else {
-    await github.rest.issues.createComment({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      issue_number: context.issue.number,
-      body: commentBody,
-    });
-  }
 };

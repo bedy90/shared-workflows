@@ -1,0 +1,42 @@
+name: Security Check
+
+on:
+  workflow_call:
+    inputs:
+      workflow_token:
+        description: "GITHUB_TOKEN ou PAT pour accéder au dépôt partagé"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  security-analysis:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout calling repository
+        uses: actions/checkout@v4
+
+      - name: Checkout central workflow repository
+        uses: actions/checkout@v4
+        with:
+          repository: bedy90/shared-workflows
+          path: .central-workflow
+          ref: dev
+          token: ${{ inputs.workflow_token || secrets.GITHUB_TOKEN }}
+
+      - name: Use Node 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: Security Analysis
+        uses: ./.central-workflow/.github/actions/security
+        with:
+          central_path: ".central-workflow"
+          workflow_token: ${{ inputs.workflow_token || secrets.GITHUB_TOKEN }}
