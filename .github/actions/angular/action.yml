@@ -1,0 +1,28 @@
+name: "Module Angular"
+description: "Exécute le build Angular et l'analyse des assets"
+
+inputs:
+  central_path:
+    description: "Chemin vers le dépôt shared-workflows"
+    required: true
+  workflow_token:
+    description: "Token GitHub"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Angular Build
+      shell: bash
+      run: npm run build -- --source-map=false > build-output.log 2>&1 || true
+
+    - name: Angular Analysis
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.workflow_token || github.token }}
+        script: |
+          const assetsScript = require(`${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/scripts/assets-check.cjs`);
+          const buildScript = require(`${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/scripts/build-check.cjs`);
+          await assetsScript({ github, context, templatePath: `${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/template/assets.md` });
+          await buildScript({ github, context, templatePath: `${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/template/build.md` });
