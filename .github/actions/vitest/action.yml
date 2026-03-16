@@ -22,9 +22,9 @@ runs:
       with:
         github-token: ${{ inputs.workflow_token || github.token }}
         script: |
-          const vitestScript = require(`${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/scripts/vitest.cjs`);
+          const vitestScript = require(`${process.env.GITHUB_WORKSPACE}/${{ inputs.central_path }}/.github/scripts/vitest.cjs`);
           await vitestScript({ 
             github, 
             context, 
-            templatePath: `${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/template/vitest.md` 
+            templatePath: `${process.env.GITHUB_WORKSPACE}/${{ inputs.central_path }}/.github/template/vitest.md` 
           });

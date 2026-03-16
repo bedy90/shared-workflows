@@ -22,11 +22,11 @@ runs:
       with:
         github-token: ${{ inputs.workflow_token || github.token }}
         script: |
-          const caseScript = require(`${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/scripts/case-check.cjs`);
+          const caseScript = require(`${process.env.GITHUB_WORKSPACE}/${{ inputs.central_path }}/.github/scripts/case-check.cjs`);
           await caseScript({ 
             github, 
             context, 
-            templatePath: `${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/template/case-check.md` 
+            templatePath: `${process.env.GITHUB_WORKSPACE}/${{ inputs.central_path }}/.github/template/case-check.md` 
           });
 
     - name: Check Outdated Packages
@@ -38,11 +38,11 @@ runs:
       with:
         github-token: ${{ inputs.workflow_token || github.token }}
         script: |
-          const outdatedScript = require(`${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/scripts/outdated.cjs`);
+          const outdatedScript = require(`${process.env.GITHUB_WORKSPACE}/${{ inputs.central_path }}/.github/scripts/outdated.cjs`);
           await outdatedScript({ 
             github, 
             context, 
-            templatePath: `${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/template/outdated.md` 
+            templatePath: `${process.env.GITHUB_WORKSPACE}/${{ inputs.central_path }}/.github/template/outdated.md` 
           });
 
     - name: Linter Check
@@ -56,9 +56,9 @@ runs:
       with:
         github-token: ${{ inputs.workflow_token || github.token }}
         script: |
-          const eslintScript = require(`${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/scripts/eslint.cjs`);
+          const eslintScript = require(`${process.env.GITHUB_WORKSPACE}/${{ inputs.central_path }}/.github/scripts/eslint.cjs`);
           await eslintScript({ 
             github, 
             context, 
-            templatePath: `${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/template/eslint.md` 
+            templatePath: `${process.env.GITHUB_WORKSPACE}/${{ inputs.central_path }}/.github/template/eslint.md` 
           });

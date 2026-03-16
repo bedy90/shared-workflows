@@ -22,7 +22,7 @@ runs:
       with:
         github-token: ${{ inputs.workflow_token || github.token }}
         script: |
-          const assetsScript = require(`${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/scripts/assets-check.cjs`);
-          const buildScript = require(`${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/scripts/build-check.cjs`);
-          await assetsScript({ github, context, templatePath: `${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/template/assets.md` });
-          await buildScript({ github, context, templatePath: `${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/template/build.md` });
+          const assetsScript = require(`${process.env.GITHUB_WORKSPACE}/${{ inputs.central_path }}/.github/scripts/assets-check.cjs`);
+          const buildScript = require(`${process.env.GITHUB_WORKSPACE}/${{ inputs.central_path }}/.github/scripts/build-check.cjs`);
+          await assetsScript({ github, context, templatePath: `${process.env.GITHUB_WORKSPACE}/${{ inputs.central_path }}/.github/template/assets.md` });
+          await buildScript({ github, context, templatePath: `${process.env.GITHUB_WORKSPACE}/${{ inputs.central_path }}/.github/template/build.md` });

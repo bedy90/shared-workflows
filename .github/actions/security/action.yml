@@ -29,11 +29,11 @@ runs:
       with:
         github-token: ${{ inputs.workflow_token || github.token }}
         script: |
-          const trivyScript = require(`${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/scripts/trivy.cjs`);
+          const trivyScript = require(`${process.env.GITHUB_WORKSPACE}/${{ inputs.central_path }}/.github/scripts/trivy.cjs`);
           await trivyScript({ 
             github, 
             context, 
-            templatePath: `${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/template/trivy.md` 
+            templatePath: `${process.env.GITHUB_WORKSPACE}/${{ inputs.central_path }}/.github/template/trivy.md` 
           });
 
     - name: Run NPM Audit
@@ -45,11 +45,11 @@ runs:
       with:
         github-token: ${{ inputs.workflow_token || github.token }}
         script: |
-          const auditScript = require(`${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/scripts/audit.cjs`);
+          const auditScript = require(`${process.env.GITHUB_WORKSPACE}/${{ inputs.central_path }}/.github/scripts/audit.cjs`);
           await auditScript({ 
             github, 
             context, 
-            templatePath: `${process.env.GITHUB_WORKSPACE}/${JSON.parse(process.env.INPUT_CENTRAL_PATH)}/.github/template/audit.md` 
+            templatePath: `${process.env.GITHUB_WORKSPACE}/${{ inputs.central_path }}/.github/template/audit.md` 
           });
 
     - name: Secret Scan (Gitleaks)
