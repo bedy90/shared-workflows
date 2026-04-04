@@ -161,3 +161,38 @@ Exemple pour `eslint.config.js` :
 - `.github/actions/` : Actions composites (Logique métier optimisée).
 - `.github/scripts/` : Logic JS (Node.js) utilisant `github-comment-helper.cjs`.
 - `.github/template/` : Templates Markdown Mustache pour les commentaires.
+
+---
+
+## ⚡ Compatibilité Node 24 & Dépréciation Node 20
+
+Depuis avril 2026, l'ensemble des workflows de ce dépôt a été migré vers **Node 24** pour anticiper la suppression du support de Node 20 par GitHub Actions.
+
+### Ce qui a changé
+1. **Actions GitHub** : Utilisation de `actions/checkout@v6`, `actions/setup-node@v6` et `actions/github-script@v8` qui supportent nativement Node 24.
+2. **Variable d'Environnement** : Tous les workflows incluent désormais `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` pour garantir l'exécution sur le runtime le plus récent.
+3. **Runners** : Ces changements nécessitent des runners GitHub Actions à jour (version `v2.329.0` minimum). Les runners hébergés par GitHub sont automatiquement compatibles.
+
+---
+
+## ⚠️ Dépréciation de Node 20
+
+GitHub a annoncé la **fin du support de Node 20** pour les runners GitHub Actions à partir du **1er avril 2026**.
+
+### Impact sur ce dépôt
+
+- **Version actuelle** : Tous les workflows de ce dépôt sont actuellement configurés pour utiliser **Node 24**.
+- **Compatibilité** : Ces workflows sont entièrement compatibles avec les runners GitHub Actions mis à jour (version `v2.329.0` minimum).
+- **Aucune action requise** : Si vous utilisez les runners hébergés par GitHub, aucune modification n'est nécessaire. Ils sont automatiquement mis à jour.
+
+### Si vous utilisez des runners auto-hébergés
+
+Assurez-vous que vos runners auto-hébergés sont mis à jour vers une version supportant Node 24. Les versions antérieures à `v2.329.0` pourraient rencontrer des problèmes d'exécution.
+
+### Références
+
+- [GitHub Actions deprecation notice](https://github.blog/changelog/2025-09-29-github-actions-node-20-will-be-retired-on-april-1-2026/)
+
+---
+
+La migration vers Node 24 sera effectuée en juin 2026. A ce moment, il sera possible de retirer `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`

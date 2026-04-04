@@ -18,12 +18,14 @@ jobs:
   angular-analysis:
     name: Angular Build & Assets Check
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout calling repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Checkout central workflow repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: bedy90/shared-workflows
           path: .central-workflow
@@ -31,7 +33,7 @@ jobs:
           token: ${{ inputs.workflow_token || secrets.GITHUB_TOKEN }}
 
       - name: Use Node 22.x
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22.x"
 
