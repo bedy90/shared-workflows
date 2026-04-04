@@ -18,7 +18,7 @@ runs:
       run: npm run build -- --source-map=false > build-output.log 2>&1 || true
 
     - name: Angular Analysis
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         github-token: ${{ inputs.workflow_token || github.token }}
         script: |

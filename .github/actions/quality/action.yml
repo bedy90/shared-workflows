@@ -18,7 +18,7 @@ runs:
   using: "composite"
   steps:
     - name: Check Case Sensitivity
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         github-token: ${{ inputs.workflow_token || github.token }}
         script: |
@@ -34,7 +34,7 @@ runs:
       run: npm outdated --json > outdated.json || true
 
     - name: Post Outdated Comment
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         github-token: ${{ inputs.workflow_token || github.token }}
         script: |
@@ -52,7 +52,7 @@ runs:
 
     - name: Post ESLint Comment
       if: inputs.has_eslint == 'true'
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         github-token: ${{ inputs.workflow_token || github.token }}
         script: |
