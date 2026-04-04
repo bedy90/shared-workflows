@@ -140,6 +140,19 @@ Si ce dépôt `shared-workflows` est privé :
 - Ajoutez ce token comme **Secret** dans le dépôt cible (nommé par exemple `GH_PAT_TOKEN`).
 - Utilisez-le dans l'input `workflow_token`.
 
+### 3. Ignorer les fichiers de CI (ESLint)
+
+Si votre projet utilise **ESLint**, vous devez impérativement ignorer le répertoire `.central-workflow` dans votre configuration (ex: `eslint.config.js` ou `.eslintignore`).
+
+Ce répertoire est utilisé par le workflow pour cloner ses propres scripts. S'il n'est pas ignoré, votre linter tentera d'analyser les scripts du workflow partagé, ce qui générera des erreurs de linter non liées à votre code.
+
+Exemple pour `eslint.config.js` :
+```javascript
+  {
+    ignores: ['.central-workflow', 'dist', 'node_modules'],
+  },
+```
+
 ---
 
 ## 🏗️ Structure du Dépôt
