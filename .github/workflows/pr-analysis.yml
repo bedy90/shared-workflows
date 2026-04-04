@@ -40,7 +40,7 @@ jobs:
         run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
       - name: Install mustache
-        run: npm install mustache
+        run: npm install mustache --legacy-peer-deps
 
       - name: Security Module
         uses: ./.central-workflow/.github/actions/security
