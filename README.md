@@ -139,6 +139,7 @@ Si ce dépôt `shared-workflows` est privé :
 - Vous devez créer un **Fine-grained Personal Access Token (PAT)** avec les accès en lecture sur ce dépôt.
 - Ajoutez ce token comme **Secret** dans le dépôt cible (nommé par exemple `GH_PAT_TOKEN`).
 - Utilisez-le dans l'input `workflow_token`.
+- **Note importante** : Pour les projets utilisant ESLint, assurez-vous d'ignorer le répertoire `.central-workflow` dans votre configuration (ex: `eslint.config.js`) pour éviter que le linter n'analyse les fichiers internes du workflow partagé.
 
 ---
 
