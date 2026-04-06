@@ -1,57 +1,56 @@
 # 🛠️ Shared Workflow Repository
 
-Ce dépôt contient les workflows GitHub Actions centralisés et réutilisables pour l'ensemble des projets de l'organisation.
+Ce dépôt centralise les workflows GitHub Actions réutilisables pour l'ensemble des projets de l'organisation. Il garantit la standardisation de la sécurité, de la qualité et des processus de mise en prod.
+
+---
 
 ## 🚀 Workflows Disponibles
 
-### 🕵️ PR Analysis (`PR Analysis.yml`)
+Ce dépôt propose un orchestrateur global ou des modules individuels selon vos besoins :
 
-Analyse de sécurité et de qualité du code sur les Pull Requests.
+### 🕵️ [PR Analysis](.github/workflows/pr-analysis.yml) (Recommandé)
+Analyse complète regroupant : Sécurité (Trivy, NPM Audit, Gitleaks), Qualité (ESLint), Compatibilité (Case Check), Framework (Angular) et Tests (ViTest).
 
-**Inclus :**
-
-- 🛡️ **Security Check** : Scan de vulnérabilités (Trivy), audit des dépendances (NPM Audit) et détection de secrets (Gitleaks).
-- 🆙 **Dependency Check** : Liste des packages obsolètes (NPM Outdated).
-- 🎨 **Linter Check** : Qualité du code via ESLint (automatiquement activé si présent).
-- 🔠 **Case Check** : Vérification de la casse des noms de fichiers pour la compatibilité Windows/Linux.
-- 🅰️ **Angular Check** : Build et vérification des assets (polices, vidéos, audio, images modernes).
-- ⚡ **ViTest Check** : Exécution des tests unitaires (si `vitest` est présent).
-- 📝 **Commit Lint** : Validation des messages de commit (prêt pour activation future).
-
----
-
-### 🧱 Workflows Individuels (Modulaires)
-
-Vous pouvez utiliser chaque module séparément selon vos besoins :
-
-- `security-check.yml`
-- `dependency-check.yml`
-- `linter-check.yml`
-- `angular-check.yml`
-- `vitest-check.yml`
-- `commit-lint-check.yml`
-
-## ⚙️ Architecture Technique
-
-Le système repose sur une architecture hybride optimisée :
-
-1. **Actions Composites** : Situées dans `.github/actions/`, elles encapsulent la logique réelle (scripts + outils). Elles sont conçues pour être ultra-rapides en s'exécutant dans le même environnement que le job parent.
-2. **Actions Réutilisables** : Situées dans `.github/workflows/`, elles servent d'interfaces publiques. Elles appellent les actions composites.
-3. **Scripts JS & Templates** : Utilisent un helper standardisé pour garantir des rapports visuels cohérents sur GitHub.
-
-### 🔠 Vérification de la Casse
-
-Le système inclut désormais une vérification automatique de la casse des noms de fichiers. Si deux fichiers ont des noms identiques à la casse près (ex: `readme.md` et `README.md`), un avertissement sera posté. Cela prévient les erreurs de clonage fatales sur Windows.
+### 🧱 modules Individuels
+Pour un usage granulaire, vous pouvez utiliser :
+- `security-check.yml` : Scan de vulnérabilités et secrets.
+- `linter-check.yml` : Qualité du code via ESLint.
+- `dependency-check.yml` : Détection de packages obsolètes.
+- `angular-check.yml` : Build et vérification des assets Angular.
+- `vitest-check.yml` : Tests unitaires JavaScript/TypeScript.
+- `commit-lint-check.yml` : Validation des messages de commit.
+- `check-version-pr.yml` : Contrôle de l'incrément de version.
 
 ---
 
-## 🚀 Utilisation des Workflows
+## 📋 Sommaire
 
-### 🌟 Option 1 : Analyse Complète (Recommandé)
+1. [🚀 Workflows & Mode d'emploi](#-workflows--mode-demploi)
+   - [🕵️ PR Analysis (Analyse complète)](#-pr-analysis-analyse-complète)
+   - [🧱 Workflows par Module (Usage individuel)](#-workflows-par-module-usage-individuel)
+   - [🏷️ Contrôle de Version (Usage spécifique PR)](#-contrôle-de-version-usage-spécifique-pr)
+2. [⚙️ Configuration & Sécurité](#-configuration--sécurité)
+   - [🔑 Gestion du secret GITLEAKS_LICENSE](#-gestion-du-secret-gitleaks_license)
+   - [🛡️ Paramètres Communs & Permissions](#-paramètres-communs--permissions)
+   - [🎨 Configuration requise (ESLint, PAT, Accès)](#-configuration-requise-eslint-pat-accès)
+3. [🏗️ Détails Techniques & Maintenance](#-détails-techniques--maintenance)
+   - [📐 Architecture technique](#-architecture-technique)
+   - [📂 Structure du dépôt](#-structure-du-dépôt)
+   - [⚡ Compatibilité & Dépréciation Node 24/20](#-compatibilité--dépréciation-node-2420)
 
-Le workflow `pr-analysis.yml` est un orchestrateur optimisé qui exécute toutes les vérifications pertinentes pour votre projet en un seul job. Il détecte automatiquement si votre projet utilise Angular, ViTest ou ESLint.
+---
 
-**Avantages :** Gain de temps (un seul `npm install`), vision globale.
+## 🚀 Workflows & Mode d'emploi
+
+<details>
+<summary id="🕵️-pr-analysis-analyse-complète"><strong>🕵️ PR Analysis (Analyse complète - Recommandé)</strong></summary>
+
+Le workflow `pr-analysis.yml` est un orchestrateur optimisé qui exécute toutes les vérifications pertinentes (Angular, ViTest, ESLint, Sécurité) en un seul job pour gagner du temps.
+
+**Avantages :** 
+- Un seul `npm install`.
+- Détection automatique des technos de votre projet.
+- Rapport global consolidé.
 
 ```yaml
 jobs:
@@ -61,139 +60,161 @@ jobs:
       contents: read
       pull-requests: write
       checks: write
-    secrets: inherit # Nécessaire pour Gitleaks et Trivy
+    with:
+      gitleaks_license: ${{ secrets.GITLEAKS_LICENSE }}
+    secrets: inherit
 ```
+</details>
+
+<details>
+<summary id="🧱-workflows-par-module-usage-individuel"><strong>🧱 Workflows par Module (Usage individuel)</strong></summary>
+
+Si vous avez besoin d'un contrôle granulaire, vous pouvez appeler chaque module séparément :
+
+*   **🛡️ Sécurité (`security-check.yml`)** : Combine Trivy (vulnérabilités FS), NPM Audit (dépendances) et Gitleaks (secrets).
+    ```yaml
+    uses: bedy90/shared-workflows/.github/workflows/security-check.yml@dev
+    with:
+      gitleaks_license: ${{ secrets.GITLEAKS_LICENSE }}
+    ```
+*   **🎨 Linter (`linter-check.yml`)** : Exécute ESLint si présent.
+    ```yaml
+    uses: bedy90/shared-workflows/.github/workflows/linter-check.yml@dev
+    ```
+*   **🆙 Dépendances (`dependency-check.yml`)** : Vérifie les packages obsolètes (`npm outdated`).
+    ```yaml
+    uses: bedy90/shared-workflows/.github/workflows/dependency-check.yml@dev
+    ```
+*   **🅰️ Angular (`angular-check.yml`)** : Build de prod + vérification de l'intégrité des assets.
+    ```yaml
+    uses: bedy90/shared-workflows/.github/workflows/angular-check.yml@dev
+    ```
+*   **⚡ ViTest (`vitest-check.yml`)** : Exécute les tests unitaires via ViTest.
+    ```yaml
+    uses: bedy90/shared-workflows/.github/workflows/vitest-check.yml@dev
+    ```
+</details>
+
+<details>
+<summary id="🏷️-contrôle-de-version-usage-spécifique-pr"><strong>🏷️ Contrôle de Version (Usage spécifique PR)</strong></summary>
+
+Vérifie que la version dans le `package.json` a bien été incrémentée et que le tag n'existe pas déjà. Recommandé pour cibler `main` ou `prod`.
+
+**Option A : Fichier dédié (Restreint via le trigger)**
+```yaml
+on:
+  pull_request:
+    branches: [main, prod]
+jobs:
+  version_check:
+    uses: bedy90/shared-workflows/.github/workflows/check-version-pr.yml@dev
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+```
+
+**Option B : Workflow global (Restreint via un 'if')**
+```yaml
+on:
+  pull_request:
+jobs:
+  version_check:
+    if: github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'prod'
+    uses: bedy90/shared-workflows/.github/workflows/check-version-pr.yml@dev
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+```
+</details>
 
 ---
 
-### 🧱 Option 2 : Utilisation par Module
+## ⚙️ Configuration & Sécurité
 
-Si vous avez besoin d'un contrôle granulaire, vous pouvez appeler chaque module séparément.
+<details>
+<summary id="🔑-gestion-du-secret-gitleaks_license"><strong>🔑 Gestion du secret GITLEAKS_LICENSE</strong></summary>
 
-#### 🛡️ Sécurité (`security-check.yml`)
+Le secret `GITLEAKS_LICENSE` peut être configuré à trois niveaux selon vos besoins :
 
-Combine Trivy (vulnérabilités FS), NPM Audit (dépendances) et Gitleaks (secrets).
+*   **🌐 Niveau Utilisateur** : Allez dans vos *Settings utilisateur* -> *Secrets and variables* -> *Actions*. Disponible pour tous vos dépôts personnels.
+*   **🏢 Niveau Organisation** : Allez dans les *Settings de l'Organisation* -> *Secrets and variables* -> *Actions*. Partagé entre tous les dépôts de l'org. **(Recommandé)**.
+*   **📁 Niveau Projet** : Allez dans les *Settings du dépôt* -> *Secrets and variables* -> *Actions*. Uniquement pour ce projet précis.
 
-```yaml
-uses: bedy90/shared-workflows/.github/workflows/security-check.yml@dev
-```
+> **Rappel :** Utilisez toujours `secrets: inherit` ou passez-le via l'input `gitleaks_license` dans votre YAML d'appel.
+</details>
 
-#### 🎨 Linter (`linter-check.yml`)
+<details>
+<summary id="🛡️-paramètres-communs--permissions"><strong>🛡️ Paramètres Communs & Permissions</strong></summary>
 
-Exécute ESLint. S'active uniquement si `eslint` est présent dans le `package.json`.
-
-```yaml
-uses: bedy90/shared-workflows/.github/workflows/linter-check.yml@dev
-```
-
-#### 🆙 Dépendances (`dependency-check.yml`)
-
-Vérifie les packages obsolètes via `npm outdated`.
-
-```yaml
-uses: bedy90/shared-workflows/.github/workflows/dependency-check.yml@dev
-```
-
-#### 🅰️ Angular (`angular-check.yml`)
-
-Effectue le build de production et vérifie l'intégrité des assets.
-
-```yaml
-uses: bedy90/shared-workflows/.github/workflows/angular-check.yml@dev
-```
-
-#### ⚡ ViTest (`vitest-check.yml`)
-
-Exécute les tests unitaires via ViTest.
-
-```yaml
-uses: bedy90/shared-workflows/.github/workflows/vitest-check.yml@dev
-```
-
----
-
-## ⚙️ Paramètres Communs
-
-Tous les workflows acceptent les inputs suivants :
+### ⚙️ Paramètres Communs
 
 | Input | Description | Défaut |
 | :--- | :--- | :--- |
 | `workflow_token` | GITHUB_TOKEN ou PAT pour accéder au dépôt partagé | `""` |
+| `gitleaks_license` | Licence commerciale Gitleaks | `""` |
 
----
+### 🔑 Permissions Requises
+Dans le dépôt cible (**Settings** -> **Actions** -> **General**) :
+- **Workflow permissions** : "Read and write permissions".
+- Cocher "Allow GitHub Actions to create and approve pull requests".
+</details>
 
----
+<details>
+<summary id="🎨-configuration-requise-eslint-pat-accès"><strong>🎨 Configuration requise (ESLint, PAT, Accès)</strong></summary>
 
-## 🛠️ Configuration Requise
+### 1. Accès au Dépôt Partagé (Si Privé)
+Si ce dépôt est privé, créez un **Fine-grained Personal Access Token (PAT)** avec accès lecture et ajoutez-le en tant que secret (ex: `GH_PAT_TOKEN`) dans votre projet cible. Utilisez-le via l'input `workflow_token`.
 
-Pour utiliser ces workflows dans un autre dépôt, assurez-vous de configurer les points suivants :
+### 2. Ignorer les fichiers de CI pour ESLint
+**Critique :** Ajoutez `.central-workflow` dans votre configuration ESLint pour éviter d'analyser les scripts du workflow partagé.
 
-### 1. Autoriser les Workflows Partagés
-Dans le dépôt cible :
-- Allez dans **Settings** > **Actions** > **General**.
-- Dans **Workflow permissions**, sélectionnez **Read and write permissions**.
-- Cochez **Allow GitHub Actions to create and approve pull requests**.
-
-### 2. Accès au Dépôt Partagé (Si Privé)
-Si ce dépôt `shared-workflows` est privé :
-- Vous devez créer un **Fine-grained Personal Access Token (PAT)** avec les accès en lecture sur ce dépôt.
-- Ajoutez ce token comme **Secret** dans le dépôt cible (nommé par exemple `GH_PAT_TOKEN`).
-- Utilisez-le dans l'input `workflow_token`.
-- **Note importante** : Pour les projets utilisant ESLint, assurez-vous d'ignorer le répertoire `.central-workflow` dans votre configuration (ex: `eslint.config.js`) pour éviter que le linter n'analyse les fichiers internes du workflow partagé.
-
-### 3. Ignorer les fichiers de CI (ESLint)
-
-Si votre projet utilise **ESLint**, vous devez impérativement ignorer le répertoire `.central-workflow` dans votre configuration (ex: `eslint.config.js` ou `.eslintignore`).
-
-Ce répertoire est utilisé par le workflow pour cloner ses propres scripts. S'il n'est pas ignoré, votre linter tentera d'analyser les scripts du workflow partagé, ce qui générera des erreurs de linter non liées à votre code.
-
-Exemple pour `eslint.config.js` :
+Exemple `eslint.config.js` :
 ```javascript
-  {
-    ignores: ['.central-workflow', 'dist', 'node_modules'],
-  },
+{
+  ignores: ['.central-workflow', 'dist', 'node_modules'],
+}
 ```
+</details>
 
 ---
 
-## 🏗️ Structure du Dépôt
+## 🏗️ Détails Techniques & Maintenance
 
-- `.github/workflows/` : Définitions des workflows réutilisables (Interfaces).
-- `.github/actions/` : Actions composites (Logique métier optimisée).
-- `.github/scripts/` : Logic JS (Node.js) utilisant `github-comment-helper.cjs`.
-- `.github/template/` : Templates Markdown Mustache pour les commentaires.
+<details>
+<summary id="📐-architecture-technique"><strong>📐 Architecture technique</strong></summary>
 
----
+Le système repose sur une architecture hybride :
+1.  **Actions Composites** (`.github/actions/`) : Encapsulent la logique (scripts JS + templates). Ultra-rapides car exécutées dans l'environnement du job parent.
+2.  **Actions Réutilisables** (`.github/workflows/`) : Interfaces publiques (`workflow_call`) qui orchestrent les actions composites.
+3.  **Scripts JS** : Utilisent un helper standard (`github-comment-helper.cjs`) pour des rapports Markdown cohérents.
+4.  **Vérification de Casse** : Inclus une détection automatique pour éviter les erreurs de clonage Windows/Linux (ex: `readme.md` vs `README.md`).
+</details>
 
-## ⚡ Compatibilité Node 24 & Dépréciation Node 20
+<details>
+<summary id="📂-structure-du-dépôt"><strong>📂 Structure du dépôt</strong></summary>
 
-Depuis avril 2026, l'ensemble des workflows de ce dépôt a été migré vers **Node 24** pour anticiper la suppression du support de Node 20 par GitHub Actions.
+- `.github/workflows/` : Définitions des workflows partagés (Interfaces).
+- `.github/actions/` : Actions composites (Logique métier).
+- `.github/scripts/` : Logic JS (Node.js) et helpers.
+- `.github/template/` : Templates Markdown Mustache pour les commentaires GitHub.
+</details>
 
-### Ce qui a changé
-1. **Actions GitHub** : Utilisation de `actions/checkout@v6`, `actions/setup-node@v6` et `actions/github-script@v8` qui supportent nativement Node 24.
-2. **Variable d'Environnement** : Tous les workflows incluent désormais `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` pour garantir l'exécution sur le runtime le plus récent.
-3. **Runners** : Ces changements nécessitent des runners GitHub Actions à jour (version `v2.329.0` minimum). Les runners hébergés par GitHub sont automatiquement compatibles.
+<details>
+<summary id="⚡-compatibilité-&-dépréciation-node-2420"><strong>⚡ Compatibilité & Dépréciation Node 24/20</strong></summary>
 
----
+### 🚀 Migration Node 24
+Depuis avril 2026, tous les workflows utilisent :
+- `actions/checkout@v6`, `actions/setup-node@v6`.
+- `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` pour garantir l'exécution sur le runtime le plus récent.
 
-## ⚠️ Dépréciation de Node 20
+### ⚠️ Fin de support Node 20
+GitHub a arrêté le support de Node 20 le **1er avril 2026**. Ce dépôt est 100% compatible avec les nouveaux standards.
 
-GitHub a annoncé la **fin du support de Node 20** pour les runners GitHub Actions à partir du **1er avril 2026**.
-
-### Impact sur ce dépôt
-
-- **Version actuelle** : Tous les workflows de ce dépôt sont actuellement configurés pour utiliser **Node 24**.
-- **Compatibilité** : Ces workflows sont entièrement compatibles avec les runners GitHub Actions mis à jour (version `v2.329.0` minimum).
-- **Aucune action requise** : Si vous utilisez les runners hébergés par GitHub, aucune modification n'est nécessaire. Ils sont automatiquement mis à jour.
-
-### Si vous utilisez des runners auto-hébergés
-
-Assurez-vous que vos runners auto-hébergés sont mis à jour vers une version supportant Node 24. Les versions antérieures à `v2.329.0` pourraient rencontrer des problèmes d'exécution.
-
-### Références
-
-- [GitHub Actions deprecation notice](https://github.blog/changelog/2025-09-29-github-actions-node-20-will-be-retired-on-april-1-2026/)
+**Runners auto-hébergés :** Assurez-vous d'utiliser une version >= `v2.329.0` pour supporter Node 24.
+</details>
 
 ---
 
-La migration vers Node 24 sera effectuée en juin 2026. A ce moment, il sera possible de retirer `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`
+_Dernière mise à jour : Avril 2026 - Migration Node 24 effectuée._
