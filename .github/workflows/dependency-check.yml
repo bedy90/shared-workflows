@@ -30,7 +30,7 @@ jobs:
           repository: bedy90/shared-workflows
           path: .central-workflow
           ref: dev
-          token: ${{ inputs.workflow_token || secrets.GITHUB_TOKEN }}
+          token: ${{ inputs.workflow_token || github.token }}
 
       - name: Use Node 22.x
         uses: actions/setup-node@v6
@@ -41,5 +41,5 @@ jobs:
         uses: ./.central-workflow/.github/actions/quality
         with:
           central_path: ".central-workflow"
-          workflow_token: ${{ inputs.workflow_token || secrets.GITHUB_TOKEN }}
+          workflow_token: ${{ inputs.workflow_token || github.token }}
           has_eslint: "false"

@@ -60,9 +60,11 @@ jobs:
       contents: read
       pull-requests: write
       checks: write
-    with:
+    secrets:
+      # Option A : Passage explicite (Recommandé)
       gitleaks_license: ${{ secrets.GITLEAKS_LICENSE }}
-    secrets: inherit
+      # Option B : Héritage global (Simplifié)
+      # secrets: inherit
 ```
 </details>
 
@@ -74,8 +76,11 @@ Si vous avez besoin d'un contrôle granulaire, vous pouvez appeler chaque module
 *   **🛡️ Sécurité (`security-check.yml`)** : Combine Trivy (vulnérabilités FS), NPM Audit (dépendances) et Gitleaks (secrets).
     ```yaml
     uses: bedy90/shared-workflows/.github/workflows/security-check.yml@dev
-    with:
+    secrets:
+      # Option A : Passage explicite (Recommandé)
       gitleaks_license: ${{ secrets.GITLEAKS_LICENSE }}
+      # Option B : Héritage global (Simplifié)
+      # secrets: inherit
     ```
 *   **🎨 Linter (`linter-check.yml`)** : Exécute ESLint si présent.
     ```yaml
@@ -142,18 +147,23 @@ Le secret `GITLEAKS_LICENSE` peut être configuré à trois niveaux selon vos be
 *   **🏢 Niveau Organisation** : Allez dans les *Settings de l'Organisation* -> *Secrets and variables* -> *Actions*. Partagé entre tous les dépôts de l'org. **(Recommandé)**.
 *   **📁 Niveau Projet** : Allez dans les *Settings du dépôt* -> *Secrets and variables* -> *Actions*. Uniquement pour ce projet précis.
 
-> **Rappel :** Utilisez toujours `secrets: inherit` ou passez-le via l'input `gitleaks_license` dans votre YAML d'appel.
+> **Rappel :** Utilisez toujours `secrets: inherit` ou passez-le explicitement via le bloc `secrets: { gitleaks_license: ... }` dans votre YAML d'appel.
 </details>
 
 <details>
 <summary id="🛡️-paramètres-communs--permissions"><strong>🛡️ Paramètres Communs & Permissions</strong></summary>
 
-### ⚙️ Paramètres Communs
+### ⚙️ Paramètres Communs (Inputs)
 
 | Input | Description | Défaut |
 | :--- | :--- | :--- |
 | `workflow_token` | GITHUB_TOKEN ou PAT pour accéder au dépôt partagé | `""` |
-| `gitleaks_license` | Licence commerciale Gitleaks | `""` |
+
+### 🔑 Configuration des Secrets
+
+| Secret | Description | Obligatoire |
+| :--- | :--- | :--- |
+| `gitleaks_license` | Licence commerciale Gitleaks | Non |
 
 ### 🔑 Permissions Requises
 Dans le dépôt cible (**Settings** -> **Actions** -> **General**) :
