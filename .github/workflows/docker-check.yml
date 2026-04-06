@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       check_docker_compose:
-        description: "Valider les fichiers Docker-Compose"
+        description: "Valider les fichiers docker-compose"
         required: false
         type: boolean
         default: false
@@ -14,54 +14,25 @@ on:
         type: string
         default: ""
 
-permissions:
-  contents: read
-  security-events: write
-  pull-requests: write
-
 jobs:
   docker-validation:
-    name: Docker Logic Validation
+    name: Docker Audit
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - name: Checkout calling repository
+      - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: 🐳 Hadolint (Dockerfile Lint)
-        run: |
-          docker run --rm -i hadolint/hadolint < $(find . -maxdepth 2 -name "Dockerfile" | head -n 1) || echo "Aucun Dockerfile trouvé ou erreur de lint."
-
-      - name: 🧩 Docker-Compose Config Validation
-        if: inputs.check_docker_compose == true
-        run: |
-          COMPOSE_FILE=$(find . -maxdepth 2 -name "docker-compose.yml" -o -name "docker-compose.yaml" | head -n 1)
-          if [ -f "$COMPOSE_FILE" ]; then
-            echo "🔎 Validation du fichier : $COMPOSE_FILE"
-            docker-compose -f "$COMPOSE_FILE" config -q
-          else
-            echo "ℹ️ Aucun fichier docker-compose trouvé."
-          fi
-
-      - name: 🛡️ Trivy Scan (Code Source & Dockerfile)
-        uses: aquasecurity/trivy-action@master
+      - name: Checkout central workflow repository
+        uses: actions/checkout@v6
         with:
-          scan-type: 'fs'
-          format: 'table'
-          exit-code: '0'
-          severity: 'CRITICAL,HIGH'
+          repository: bedy90/shared-workflows
+          path: .central-workflow
+          ref: dev
+          token: ${{ inputs.workflow_token || github.token }}
 
-      - name: 🛡️ Trivy Scan (Images Docker Compose)
-        if: inputs.check_docker_compose == true
-        run: |
-          COMPOSE_FILE=$(find . -maxdepth 2 -name "docker-compose.yml" -o -name "docker-compose.yaml" | head -n 1)
-          if [ -f "$COMPOSE_FILE" ]; then
-            # Extraction des images (excluant les builds locaux)
-            IMAGES=$(docker-compose -f "$COMPOSE_FILE" config | yq '.services[].image' | grep -v "null")
-            for image in $IMAGES; do
-              echo "🔎 Scan de l'image distante : $image"
-              docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ \
-                aquasec/trivy:latest image --severity HIGH,CRITICAL "$image" || true
-            done
-          fi
+      - name: Docker Module
+        uses: ./.central-workflow/.github/actions/docker
+        with:
+          check_docker_compose: "${{ inputs.check_docker_compose }}"

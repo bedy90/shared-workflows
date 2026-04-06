@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       enable_release_drafter:
-        description: "Activer Release Drafter"
+        description: "Activer le Release Drafter"
         required: false
         type: boolean
         default: false
@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   update_release_draft:
-    name: Update Draft
+    name: Release Drafting
     if: inputs.enable_release_drafter == true
     runs-on: ubuntu-latest
     env:
@@ -37,7 +37,7 @@ jobs:
           ref: dev
           token: ${{ inputs.workflow_token || github.token }}
 
-      - name: Merge Release Drafter Configuration
+      - name: ⚙️ Prepare Final Configuration
         shell: bash
         run: |
           CENTRAL=".central-workflow/.github/configs/release-drafter.yml"
@@ -45,10 +45,10 @@ jobs:
           FINAL=".github/release-drafter-final.yml"
           
           if [ -f "$LOCAL" ]; then
-            echo "🔎 Fusion avec la configuration locale..."
+            echo "🔎 Fusion avec la config locale..."
             yq eval-all 'select(fileIndex == 0) *+ select(fileIndex == 1)' "$CENTRAL" "$LOCAL" > "$FINAL"
           else
-            echo "ℹ️ Aucune configuration locale, utilisation du standard."
+          echo "ℹ️ Aucune configuration locale, utilisation du standard."
             cp "$CENTRAL" "$FINAL"
           fi
 

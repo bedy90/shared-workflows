@@ -1,0 +1,60 @@
+# 🏷️ Standards de Labels - Organisation Bedy90
+
+# -- Areas (Périmètres) --
+- name: "area:devops"
+  color: "0052cc"
+  description: "CI/CD, Workflows GitHub, Infrastructure"
+
+- name: "area:documentation"
+  color: "0075ca"
+  description: "README, Documentation technique, Commentaires"
+
+- name: "area:testing"
+  color: "fbca04"
+  description: "Tests unitaires, intégration, couverture de code"
+
+- name: "area:security"
+  color: "e99695"
+  description: "Vulnérabilités, Gitleaks, Trivy"
+
+- name: "area:frontend"
+  color: "cfe1f1"
+  description: "UI/UX, Angular, Stylisation"
+
+# -- Types (Natures de changement) --
+- name: "type:feature"
+  color: "0e8a16"
+  description: "Nouvelle fonctionnalité majeure"
+
+- name: "type:fix"
+  color: "d73a4a"
+  description: "Correction de bug ou d'erreur"
+
+- name: "type:enhancement"
+  color: "a2eeef"
+  description: "Amélioration ou ajout mineur"
+
+- name: "type:breaking-change"
+  color: "b60205"
+  description: "Modification majeure cassant la compatibilité"
+
+- name: "type:refactor"
+  color: "fef2c0"
+  description: "Modification de code sans changement fonctionnel"
+
+- name: "type:chore"
+  color: "ededed"
+  description: "Tâches de maintenance (dépendances, outils)"
+
+# -- Etats / Priorités --
+- name: "priority:high"
+  color: "b60205"
+  description: "Urgent - À traiter en priorité"
+
+- name: "status:work-in-progress"
+  color: "f9d0c4"
+  description: "En cours de développement"
+
+- name: "status:review-required"
+  color: "fbca04"
+  description: "En attente de revue"

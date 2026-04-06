@@ -1,0 +1,126 @@
+# 🚀 Mode d'emploi des Workflows
+
+Ce guide détaille l'utilisation de chaque module disponible dans la bibliothèque `shared-workflows`.
+
+---
+
+## 🕵️ PR Analysis (Analyse complète - Recommandé)
+
+Le workflow `pr-analysis.yml` est un orchestrateur optimisé qui exécute toutes les vérifications pertinentes (Angular, ViTest, ESLint, Sécurité) en un seul job pour gagner du temps.
+
+**Avantages :** 
+- Un seul `npm install` (Optimisation du temps de build).
+- Détection automatique des technologies (Angular/ViTest).
+- Rapport global consolidé dans les commentaires de la PR.
+
+```yaml
+jobs:
+  analysis:
+    name: "PR Analysis (Security & Quality)"
+    uses: bedy90/shared-workflows/.github/workflows/pr-analysis.yml@dev
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+    secrets:
+      # Option A : Passage explicite (Recommandé)
+      gitleaks_license: ${{ secrets.GITLEAKS_LICENSE }}
+      # Option B : Héritage global (Simplifié)
+      # secrets: inherit
+```
+
+---
+
+## 🧱 Workflows par Module (Usage individuel)
+
+Si vous avez besoin d'un contrôle granulaire, vous pouvez appeler chaque module séparément :
+
+### 🛡️ Sécurité (`security-check.yml`)
+Combine Trivy (vulnérabilités FS), NPM Audit (dépendances) et Gitleaks (secrets).
+```yaml
+name: "Security Audit"
+uses: bedy90/shared-workflows/.github/workflows/security-check.yml@dev
+secrets:
+  gitleaks_license: ${{ secrets.GITLEAKS_LICENSE }}
+```
+
+### 🎨 Linter (`linter-check.yml`)
+Exécute ESLint sur l'ensemble du projet.
+```yaml
+name: "Linter (ESLint)"
+uses: bedy90/shared-workflows/.github/workflows/linter-check.yml@dev
+```
+
+### 🆙 Dépendances (`dependency-check.yml`)
+Vérifie les packages obsolètes (`npm outdated`).
+```yaml
+name: "Dependency Audit"
+uses: bedy90/shared-workflows/.github/workflows/dependency-check.yml@dev
+```
+
+### 🅰️ Angular (`angular-check.yml`)
+Build de production + vérification de l'intégrité des assets + tests unitaires.
+```yaml
+name: "Angular Quality Check"
+uses: bedy90/shared-workflows/.github/workflows/angular-check.yml@dev
+with:
+  enable_coverage: true
+```
+
+### ⚡ ViTest (`vitest-check.yml`)
+Exécute les tests unitaires via ViTest.
+```yaml
+name: "ViTest Unit Tests"
+uses: bedy90/shared-workflows/.github/workflows/vitest-check.yml@dev
+with:
+  enable_coverage: true
+```
+
+### 🏷️ Labeler (`labeler-check.yml`)
+Auto-labeling des PR **+** Synchronisation automatique des labels de l'organisation.
+```yaml
+name: "Labeler & Org Sync"
+uses: bedy90/shared-workflows/.github/workflows/labeler-check.yml@dev
+with:
+  enable_labeler: true
+  delete_other_labels: false
+```
+
+### 📝 Release Drafter (`release-drafter.yml`)
+Prépare les brouillons de release et génère un patchnote détaillé (Commits + WorkItems).
+```yaml
+name: "Release Drafting (Patchnote Pro)"
+uses: bedy90/shared-workflows/.github/workflows/release-drafter.yml@dev
+with:
+  enable_release_drafter: true
+```
+
+### 🐳 Docker (`docker-check.yml`)
+Validation Dockerfile, Docker-Compose et sécurité (Trivy).
+```yaml
+name: "Docker Security Audit"
+uses: bedy90/shared-workflows/.github/workflows/docker-check.yml@dev
+with:
+  check_docker_compose: true
+```
+
+---
+
+## 🏷️ Contrôle de Version
+
+Vérifie que la version dans le `package.json` a bien été incrémentée et que le tag n'existe pas déjà sur le dépôt distant.
+
+**Exemple d'implémentation (PR vers main) :**
+```yaml
+on:
+  pull_request:
+    branches: [main, prod]
+jobs:
+  version_check:
+    name: "Version Increment Validation"
+    uses: bedy90/shared-workflows/.github/workflows/check-version-pr.yml@dev
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+```

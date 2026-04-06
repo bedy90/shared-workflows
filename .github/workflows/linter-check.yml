@@ -1,28 +1,28 @@
-name: Linter Check
+name: Shared Linter Check
 
 on:
   workflow_call:
     inputs:
       workflow_token:
-        description: "GITHUB_TOKEN ou PAT pour accéder au dépôt partagé"
+        description: "Token GitHub"
         required: false
         type: string
         default: ""
 
-permissions:
-  contents: read
-  pull-requests: write
-  checks: write
-
 jobs:
-  linter-analysis:
-    name: ESLint Check
+  lint:
+    name: ESLint Validation
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - name: Checkout calling repository
+      - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Use Node 22.x
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22.x"
 
       - name: Checkout central workflow repository
         uses: actions/checkout@v6
@@ -32,16 +32,9 @@ jobs:
           ref: dev
           token: ${{ inputs.workflow_token || github.token }}
 
-      - name: Use Node 22.x
-        uses: actions/setup-node@v6
-        with:
-          node-version: "22.x"
-
-      - name: Install dependencies
-        run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
-
-      - name: Check if Linter is defined
+      - name: ⚙️ Check Linter Capability
         id: check_linter
+        shell: bash
         run: |
           if [ -f "package.json" ] && grep -q "\"eslint\":" package.json; then
             echo "has_eslint=true" >> $GITHUB_OUTPUT
@@ -49,9 +42,9 @@ jobs:
             echo "has_eslint=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Linter Analysis
+      - name: Quality Module (Lint)
         uses: ./.central-workflow/.github/actions/quality
         with:
           central_path: ".central-workflow"
           workflow_token: ${{ inputs.workflow_token || github.token }}
-          has_eslint: ${{ steps.check_linter.outputs.has_eslint }}
+          has_eslint: "${{ steps.check_linter.outputs.has_eslint }}"

@@ -1,0 +1,40 @@
+name: "Label Synchronization"
+description: "Synchronise les labels standard de l'organisation"
+
+on:
+  workflow_call:
+    inputs:
+      delete_other_labels:
+        description: "Supprimer les labels qui ne sont pas dans la liste standard"
+        type: boolean
+        required: false
+        default: false
+      workflow_token:
+        description: "GITHUB_TOKEN"
+        type: string
+        required: false
+        default: ""
+
+jobs:
+  label-sync:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    steps:
+      - name: Checkout Local Repository
+        uses: actions/checkout@v6
+
+      - name: Checkout Shared Workflows (Central)
+        uses: actions/checkout@v6
+        with:
+          repository: bedy90/shared-workflows
+          path: .central-workflow
+          ref: dev
+          token: ${{ inputs.workflow_token || github.token }}
+
+      - name: 🔄 Sync Labels
+        uses: EndBug/label-sync@v2
+        with:
+          config-file: ".central-workflow/.github/configs/labels.yml"
+          delete-other-labels: ${{ inputs.delete_other_labels }}
+          token: ${{ github.token }}

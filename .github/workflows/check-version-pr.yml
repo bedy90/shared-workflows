@@ -1,44 +1,35 @@
-name: 🔍 Check PR PROD (Version)
+name: Shared Version Check
 
 on:
   workflow_call:
-
-permissions:
-  contents: read
-  pull-requests: write
-  checks: write
+    inputs:
+      workflow_token:
+        description: "Token GitHub"
+        required: false
+        type: string
+        default: ""
 
 jobs:
-  check-version:
-    name: 🚩 Validation de la version
+  version-check:
+    name: Check Version Increment & Tag
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - name: 📥 Checkout du code
+      - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Nécessaire pour git ls-remote / tags
 
-      - name: Setup Node
-        uses: actions/setup-node@v6
+      - name: Checkout central workflow repository
+        uses: actions/checkout@v6
         with:
-          node-version: "22.x"
+          repository: bedy90/shared-workflows
+          path: .central-workflow
+          ref: dev
+          token: ${{ inputs.workflow_token || github.token }}
 
-      - name: 🏷️ Lecture de la version package.json
-        id: pkg
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "VERSION=v$VERSION" >> $GITHUB_OUTPUT
-          echo "Version actuelle dans package.json : v$VERSION"
-
-      - name: 🔎 Vérification de l'existence du Tag
-        run: |
-          TAG=${{ steps.pkg.outputs.VERSION }}
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "❌ Erreur : Le tag '$TAG' existe déjà sur le dépôt."
-            echo "Veuillez incrémenter la version dans package.json avant de merger vers PROD."
-            exit 1
-          else
-            echo "✅ Succès : La version '$TAG' est nouvelle."
-          fi
+      - name: Version Module
+        uses: ./.central-workflow/.github/actions/version
+        with:
+          workflow_token: ${{ inputs.workflow_token || github.token }}

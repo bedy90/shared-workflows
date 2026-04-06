@@ -8,6 +8,11 @@ on:
         required: false
         type: boolean
         default: false
+      delete_other_labels:
+        description: "Nettoyer les labels non-standards lors de la synchronisation"
+        type: boolean
+        required: false
+        default: false
       workflow_token:
         description: "GITHUB_TOKEN ou PAT pour accéder au dépôt partagé"
         required: false
@@ -17,10 +22,37 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  issues: write
 
 jobs:
+  sync-labels:
+    name: Sync Repository Labels
+    if: inputs.enable_labeler == true
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    steps:
+      - name: Checkout calling repository
+        uses: actions/checkout@v6
+
+      - name: Checkout central workflow repository
+        uses: actions/checkout@v6
+        with:
+          repository: bedy90/shared-workflows
+          path: .central-workflow
+          ref: dev
+          token: ${{ inputs.workflow_token || github.token }}
+
+      - name: 🔄 Sync Labels
+        uses: EndBug/label-sync@v2
+        with:
+          config-file: ".central-workflow/.github/configs/labels.yml"
+          delete-other-labels: ${{ inputs.delete_other_labels }}
+          token: ${{ github.token }}
+
   labeler:
-    name: PR Labeling
+    name: Apply PR Labels
+    needs: sync-labels
     if: inputs.enable_labeler == true
     runs-on: ubuntu-latest
     env:
