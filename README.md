@@ -16,9 +16,12 @@ Pour un usage granulaire, vous pouvez utiliser :
 - `security-check.yml` : Scan de vulnérabilités et secrets.
 - `linter-check.yml` : Qualité du code via ESLint.
 - `dependency-check.yml` : Détection de packages obsolètes.
-- `angular-check.yml` : Build et vérification des assets Angular.
-- `vitest-check.yml` : Tests unitaires JavaScript/TypeScript.
+- `angular-check.yml` : Build, assets et Couverture de test Angular.
+- `vitest-check.yml` : Tests unitaires et Couverture de test JavaScript/TypeScript.
 - `commit-lint-check.yml` : Validation des messages de commit.
+- `labeler-check.yml` : Automatisation des labels de PR (Smart Merge).
+- `release-drafter.yml` : Préparation automatique des notes de version (Smart Merge).
+- `docker-check.yml` : Validation Dockerfile, Docker-Compose et sécurité (Trivy).
 - `check-version-pr.yml` : Contrôle de l'incrément de version.
 
 ---
@@ -93,10 +96,32 @@ Si vous avez besoin d'un contrôle granulaire, vous pouvez appeler chaque module
 *   **🅰️ Angular (`angular-check.yml`)** : Build de prod + vérification de l'intégrité des assets.
     ```yaml
     uses: bedy90/shared-workflows/.github/workflows/angular-check.yml@dev
+    with:
+      enable_coverage: true # Optionnel (default: false)
     ```
 *   **⚡ ViTest (`vitest-check.yml`)** : Exécute les tests unitaires via ViTest.
     ```yaml
     uses: bedy90/shared-workflows/.github/workflows/vitest-check.yml@dev
+    with:
+      enable_coverage: true # Optionnel (default: false)
+    ```
+*   **🏷️ Labeler (`labeler-check.yml`)** : Automatise les labels basés sur les fichiers modifiés.
+    ```yaml
+    uses: bedy90/shared-workflows/.github/workflows/labeler-check.yml@dev
+    with:
+      enable_labeler: true
+    ```
+*   **📝 Release Drafter (`release-drafter.yml`)** : Prépare les brouillons de release et génère un patchnote détaillé.
+    ```yaml
+    uses: bedy90/shared-workflows/.github/workflows/release-drafter.yml@dev
+    with:
+      enable_release_drafter: true
+    ```
+*   **🐳 Docker (`docker-check.yml`)** : Validation Dockerfile, Docker-Compose et sécurité (Trivy).
+    ```yaml
+    uses: bedy90/shared-workflows/.github/workflows/docker-check.yml@dev
+    with:
+      check_docker_compose: true # Optionnel (inclut le scan des images du compose)
     ```
 </details>
 
@@ -176,6 +201,16 @@ Dans le dépôt cible (**Settings** -> **Actions** -> **General**) :
 
 ### 1. Accès au Dépôt Partagé (Si Privé)
 Si ce dépôt est privé, créez un **Fine-grained Personal Access Token (PAT)** avec accès lecture et ajoutez-le en tant que secret (ex: `GH_PAT_TOKEN`) dans votre projet cible. Utilisez-le via l'input `workflow_token`.
+
+### 3. Gestion des Configurations Partagées (Smart Merge)
+Les workflows `labeler-check` et `release-drafter` utilisent un système de fusion intelligente :
+1. **Défaut** : Utilise les fichiers standards définis dans ce dépôt (`.github/configs/`).
+2. **Surcharge** : Si vous créez un fichier `.github/labeler.yml` dans votre dépôt, ses règles seront **ajoutées** aux règles standards (Deep Merge). Vos règles locales ont la priorité en cas de conflit.
+
+### 4. Intelligence Agent (Règles Antigravity)
+Si vous utilisez l'agent Antigravity, les règles dans `shared-agent` ont été mises à jour pour :
+- Forcer le format **Conventional Commits** (nécessaire pour le Release Drafter).
+- Suggérer automatiquement les **Labels** lors de la génération d'un message de PR.
 
 ### 2. Ignorer les fichiers de CI pour ESLint
 **Critique :** Ajoutez `.central-workflow` dans votre configuration ESLint pour éviter d'analyser les scripts du workflow partagé.

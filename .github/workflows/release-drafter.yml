@@ -1,0 +1,66 @@
+name: Shared Release Drafter
+
+on:
+  workflow_call:
+    inputs:
+      enable_release_drafter:
+        description: "Activer Release Drafter"
+        required: false
+        type: boolean
+        default: false
+      workflow_token:
+        description: "GITHUB_TOKEN ou PAT pour accéder au dépôt partagé"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  update_release_draft:
+    name: Update Draft
+    if: inputs.enable_release_drafter == true
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    steps:
+      - name: Checkout calling repository
+        uses: actions/checkout@v6
+
+      - name: Checkout central workflow repository
+        uses: actions/checkout@v6
+        with:
+          repository: bedy90/shared-workflows
+          path: .central-workflow
+          ref: dev
+          token: ${{ inputs.workflow_token || github.token }}
+
+      - name: Merge Release Drafter Configuration
+        shell: bash
+        run: |
+          CENTRAL=".central-workflow/.github/configs/release-drafter.yml"
+          LOCAL=".github/release-drafter.yml"
+          FINAL=".github/release-drafter-final.yml"
+          
+          if [ -f "$LOCAL" ]; then
+            echo "🔎 Fusion avec la configuration locale..."
+            yq eval-all 'select(fileIndex == 0) *+ select(fileIndex == 1)' "$CENTRAL" "$LOCAL" > "$FINAL"
+          else
+            echo "ℹ️ Aucune configuration locale, utilisation du standard."
+            cp "$CENTRAL" "$FINAL"
+          fi
+
+      - name: 📝 Génération du Patchnote Module
+        id: patchnote
+        uses: ./.central-workflow/.github/actions/patchnote
+
+      - name: Update Release Draft
+        uses: release-drafter/release-drafter@v6
+        with:
+          config-name: "release-drafter-final.yml"
+          disable-autolabeler: true 
+          footer: ${{ steps.patchnote.outputs.tech_details }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

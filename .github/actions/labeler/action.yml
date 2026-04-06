@@ -1,0 +1,36 @@
+name: "Module PR Labeler"
+description: "Fusionne les configurations et applique les labels de PR"
+
+inputs:
+  central_path:
+    description: "Chemin vers le dépôt partagé"
+    required: true
+  repo_token:
+    description: "GITHUB_TOKEN"
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Merge Labeler Configurations
+      shell: bash
+      run: |
+        CENTRAL_CONFIG="${{ env.GITHUB_WORKSPACE }}/${{ inputs.central_path }}/.github/configs/labeler.yml"
+        LOCAL_CONFIG=".github/labeler.yml"
+        FINAL_CONFIG=".github/labeler-final.yml"
+        
+        if [ -f "$LOCAL_CONFIG" ]; then
+          echo "🔎 Fusion avec la configuration locale..."
+          yq eval-all 'select(fileIndex == 0) *+ select(fileIndex == 1)' "$CENTRAL_CONFIG" "$LOCAL_CONFIG" > "$FINAL_CONFIG"
+        else
+          echo "ℹ️ Aucune configuration locale, usage standard."
+          cp "$CENTRAL_CONFIG" "$FINAL_CONFIG"
+        fi
+
+    - name: Apply Labels
+      uses: actions/labeler@v5
+      with:
+        configuration-path: ".github/labeler-final.yml"
+        sync-labels: true
+        repo-token: ${{ inputs.repo_token }}

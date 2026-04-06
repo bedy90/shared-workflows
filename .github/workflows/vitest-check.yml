@@ -8,6 +8,11 @@ on:
         required: false
         type: string
         default: ""
+      enable_coverage:
+        description: "Générer et afficher le rapport de couverture"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -55,3 +60,4 @@ jobs:
         with:
           central_path: ".central-workflow"
           workflow_token: ${{ inputs.workflow_token || github.token }}
+          enable_coverage: "${{ inputs.enable_coverage }}"
