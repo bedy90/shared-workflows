@@ -1,0 +1,44 @@
+name: 🔍 Check PR PROD (Version)
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  check-version:
+    name: 🚩 Validation de la version
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    steps:
+      - name: 📥 Checkout du code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22.x"
+
+      - name: 🏷️ Lecture de la version package.json
+        id: pkg
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=v$VERSION" >> $GITHUB_OUTPUT
+          echo "Version actuelle dans package.json : v$VERSION"
+
+      - name: 🔎 Vérification de l'existence du Tag
+        run: |
+          TAG=${{ steps.pkg.outputs.VERSION }}
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "❌ Erreur : Le tag '$TAG' existe déjà sur le dépôt."
+            echo "Veuillez incrémenter la version dans package.json avant de merger vers PROD."
+            exit 1
+          else
+            echo "✅ Succès : La version '$TAG' est nouvelle."
+          fi
