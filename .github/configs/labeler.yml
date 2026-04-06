@@ -1,0 +1,28 @@
+# Shared Labeler Configuration (Core)
+# This file is used as the base configuration for projects calling labeler-check.yml.
+
+# -- Technical Areas --
+"area:angular":
+  - changed-files:
+    - any-glob-to-any-file: "src/app/**/*"
+
+"area:tests":
+  - changed-files:
+    - any-glob-to-any-file: ["**/*.spec.ts", "**/*.test.ts"]
+
+"area:devops":
+  - changed-files:
+    - any-glob-to-any-file: [".github/**/*", "docker/**/*", "**/Dockerfile", "**/docker-compose.yml"]
+
+"area:documentation":
+  - changed-files:
+    - any-glob-to-any-file: ["README.md", "docs/**/*", "documentation/**/*"]
+
+# -- Types --
+"dependencies":
+  - changed-files:
+    - any-glob-to-any-file: ["package.json", "package-lock.json"]
+
+"linter":
+  - changed-files:
+    - any-glob-to-any-file: [".eslintrc.json", "eslint.config.js", ".prettierrc"]

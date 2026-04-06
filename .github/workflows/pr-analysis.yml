@@ -8,11 +8,10 @@ on:
         required: false
         type: string
         default: ""
+    secrets:
       gitleaks_license:
         description: "Licence Gitleaks"
         required: false
-        type: string
-        default: ""
   workflow_dispatch:
 
 permissions:
@@ -36,7 +35,7 @@ jobs:
           repository: bedy90/shared-workflows
           path: .central-workflow
           ref: dev
-          token: ${{ inputs.workflow_token || secrets.GITHUB_TOKEN }}
+          token: ${{ inputs.workflow_token || github.token }}
 
       - name: Use Node 22.x
         uses: actions/setup-node@v6
@@ -53,8 +52,8 @@ jobs:
         uses: ./.central-workflow/.github/actions/security
         with:
           central_path: ".central-workflow"
-          workflow_token: ${{ inputs.workflow_token || secrets.GITHUB_TOKEN }}
-          gitleaks_license: ${{ inputs.gitleaks_license }}
+          workflow_token: ${{ inputs.workflow_token || github.token }}
+          gitleaks_license: ${{ secrets.gitleaks_license }}
 
       - name: Check Capabilities
         id: check_caps
@@ -80,7 +79,7 @@ jobs:
         uses: ./.central-workflow/.github/actions/quality
         with:
           central_path: ".central-workflow"
-          workflow_token: ${{ inputs.workflow_token || secrets.GITHUB_TOKEN }}
+          workflow_token: ${{ inputs.workflow_token || github.token }}
           has_eslint: ${{ steps.check_caps.outputs.has_eslint }}
 
       - name: Angular Module
@@ -88,7 +87,7 @@ jobs:
         uses: ./.central-workflow/.github/actions/angular
         with:
           central_path: ".central-workflow"
-          workflow_token: ${{ inputs.workflow_token || secrets.GITHUB_TOKEN }}
+          workflow_token: ${{ inputs.workflow_token || github.token }}
 
       - name: ViTest Module
         if: steps.check_caps.outputs.has_vitest == 'true'

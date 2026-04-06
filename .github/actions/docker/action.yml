@@ -1,0 +1,36 @@
+name: "Module Docker Audit"
+description: "Validation Hadolint et Sécurité Trivy (FS & Compose)"
+
+inputs:
+  check_docker_compose:
+    description: "Activer la validation du compose"
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🐋 Hadolint (Dockerfile)
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: Dockerfile
+        ignore: DL3008
+
+    - name: 🛡️ Trivy Security Scan (Local FS & Config)
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs,config'
+        format: 'table'
+        exit-code: '0'
+        severity: 'CRITICAL,HIGH'
+
+    - name: 🛡️ Trivy Scan (Images Docker Compose)
+      if: inputs.check_docker_compose == 'true'
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'config'
+        hide-progress: false
+        format: 'table'
+        exit-code: '0'
+        severity: 'CRITICAL,HIGH'
+        image-ref: 'docker-compose.yml'

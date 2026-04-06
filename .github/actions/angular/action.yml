@@ -9,6 +9,10 @@ inputs:
     description: "Token GitHub"
     required: false
     default: ""
+  enable_coverage:
+    description: "Activer la couverture de code"
+    required: false
+    default: "false"
 
 runs:
   using: "composite"
@@ -16,6 +20,14 @@ runs:
     - name: Angular Build
       shell: bash
       run: npm run build -- --source-map=false > build-output.log 2>&1 || true
+
+    - name: Angular Tests (Optionnel)
+      shell: bash
+      run: |
+        if [ "${{ inputs.enable_coverage }}" = "true" ]; then
+          echo "📊 Exécution des tests Angular avec couverture..."
+          npx ng test --code-coverage --no-watch --no-progress --browsers=ChromeHeadless || true
+        fi
 
     - name: Angular Analysis
       uses: actions/github-script@v8

@@ -1,10 +1,15 @@
-name: ViTest Check
+name: Shared ViTest Check
 
 on:
   workflow_call:
     inputs:
+      enable_coverage:
+        description: "Activer la couverture de code"
+        required: false
+        type: boolean
+        default: false
       workflow_token:
-        description: "GITHUB_TOKEN ou PAT pour accéder au dépôt partagé"
+        description: "Token GitHub"
         required: false
         type: string
         default: ""
@@ -15,14 +20,19 @@ permissions:
   checks: write
 
 jobs:
-  vitest-analysis:
+  vitest-check:
     name: ViTest Execution
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - name: Checkout calling repository
+      - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Use Node 22.x
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22.x"
 
       - name: Checkout central workflow repository
         uses: actions/checkout@v6
@@ -30,18 +40,11 @@ jobs:
           repository: bedy90/shared-workflows
           path: .central-workflow
           ref: dev
-          token: ${{ inputs.workflow_token || secrets.GITHUB_TOKEN }}
+          token: ${{ inputs.workflow_token || github.token }}
 
-      - name: Use Node 22.x
-        uses: actions/setup-node@v6
-        with:
-          node-version: "22.x"
-
-      - name: Install dependencies
-        run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
-
-      - name: Check if ViTest
+      - name: ⚙️ Check ViTest Capabilities
         id: check_vitest
+        shell: bash
         run: |
           if [ -f "package.json" ] && grep -q "vitest" package.json; then
             echo "has_vitest=true" >> $GITHUB_OUTPUT
@@ -54,4 +57,5 @@ jobs:
         uses: ./.central-workflow/.github/actions/vitest
         with:
           central_path: ".central-workflow"
-          workflow_token: ${{ inputs.workflow_token || secrets.GITHUB_TOKEN }}
+          workflow_token: ${{ inputs.workflow_token || github.token }}
+          enable_coverage: "${{ inputs.enable_coverage }}"

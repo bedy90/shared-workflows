@@ -1,0 +1,16 @@
+name: "Module Patchnote Details"
+description: "Génère un bloc détaillé des commits et workitems pour la release"
+
+outputs:
+  tech_details:
+    description: "Le Markdown contenant les détails techniques"
+    value: ${{ steps.gen.outputs.TECH_DETAILS }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run Patchnote Script
+      id: gen
+      shell: pwsh
+      run: |
+        ${{ github.action_path }}/generate-patchnote.ps1

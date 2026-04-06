@@ -9,13 +9,24 @@ inputs:
     description: "Token GitHub"
     required: false
     default: ""
+  enable_coverage:
+    description: "Activer la couverture de code"
+    required: false
+    default: "false"
 
 runs:
   using: "composite"
   steps:
     - name: ViTest Execution
       shell: bash
-      run: npx vitest run --reporter=json --outputFile=vitest-report.json || true
+      run: |
+        if [ "${{ inputs.enable_coverage }}" = "true" ]; then
+          echo "📊 Exécution avec couverture..."
+          npx vitest run --coverage --reporter=json --outputFile=vitest-report.json || true
+        else
+          echo "🧪 Exécution standard..."
+          npx vitest run --reporter=json --outputFile=vitest-report.json || true
+        fi
 
     - name: ViTest Analysis
       uses: actions/github-script@v8
@@ -28,3 +39,10 @@ runs:
             context, 
             templatePath: `${process.env.GITHUB_WORKSPACE}/${{ inputs.central_path }}/.github/template/vitest.md` 
           });
+
+    - name: 📈 ViTest Coverage Report
+      if: inputs.enable_coverage == 'true'
+      uses: davelosert/vitest-coverage-report-action@v2
+      with:
+        json-summary-path: './coverage/coverage-summary.json'
+        json-final-path: './coverage/coverage-final.json'

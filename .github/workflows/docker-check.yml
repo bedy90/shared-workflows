@@ -1,28 +1,28 @@
-name: Shared Dependency Check
+name: Shared Docker Check
 
 on:
   workflow_call:
     inputs:
+      check_docker_compose:
+        description: "Valider les fichiers docker-compose"
+        required: false
+        type: boolean
+        default: false
       workflow_token:
-        description: "Token GitHub"
+        description: "GITHUB_TOKEN ou PAT pour accéder au dépôt partagé"
         required: false
         type: string
         default: ""
 
 jobs:
-  outdated-check:
-    name: Dependency Validation
+  docker-validation:
+    name: Docker Audit
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-
-      - name: Use Node 22.x
-        uses: actions/setup-node@v6
-        with:
-          node-version: "22.x"
 
       - name: Checkout central workflow repository
         uses: actions/checkout@v6
@@ -32,9 +32,7 @@ jobs:
           ref: dev
           token: ${{ inputs.workflow_token || github.token }}
 
-      - name: Quality Module (Outdated)
-        uses: ./.central-workflow/.github/actions/quality
+      - name: Docker Module
+        uses: ./.central-workflow/.github/actions/docker
         with:
-          central_path: ".central-workflow"
-          workflow_token: ${{ inputs.workflow_token || github.token }}
-          has_eslint: "false"
+          check_docker_compose: "${{ inputs.check_docker_compose }}"
