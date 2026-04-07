@@ -32,9 +32,9 @@ jobs:
           ref: dev
           token: ${{ inputs.workflow_token || github.token }}
 
-      - name: 🔄 Sync Labels
-        uses: EndBug/label-sync@v2
+      - name: 🔄 Sync Labels (Dual-Config)
+        uses: ./.central-workflow/.github/actions/labels
         with:
-          config-file: ".central-workflow/.github/configs/labels.yml"
-          delete-other-labels: ${{ inputs.delete_other_labels }}
-          token: ${{ github.token }}
+          central_path: ".central-workflow"
+          delete_other_labels: ${{ inputs.delete_other_labels }}
+          repo_token: ${{ inputs.workflow_token || github.token }}

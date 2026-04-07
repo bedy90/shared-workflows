@@ -1,0 +1,41 @@
+name: "Module Labels Sync"
+description: "Fusionne les configurations et synchronise les labels GitHub"
+
+inputs:
+  central_path:
+    description: "Chemin vers le dépôt partagé"
+    required: true
+  delete_other_labels:
+    description: "Nettoyer les labels non-standards"
+    required: false
+    default: "false"
+  repo_token:
+    description: "GITHUB_TOKEN"
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Merge Label Configurations
+      shell: bash
+      run: |
+        CENTRAL_CONFIG="${{ env.GITHUB_WORKSPACE }}/${{ inputs.central_path }}/.github/configs/labels.yml"
+        LOCAL_CONFIG=".github/labels.yml"
+        FINAL_CONFIG=".github/labels-final.yml"
+        
+        if [ -f "$LOCAL_CONFIG" ]; then
+          echo "🔎 Fusion avec la configuration locale..."
+          # Utilisation de yq pour fusionner les deux listes en privilégiant le local (last wins)
+          yq eval-all '[.[]] | group_by(.name) | map(last)' "$CENTRAL_CONFIG" "$LOCAL_CONFIG" > "$FINAL_CONFIG"
+        else
+          echo "ℹ️ Aucune configuration locale, usage standard."
+          cp "$CENTRAL_CONFIG" "$FINAL_CONFIG"
+        fi
+
+    - name: 🔄 Sync Labels
+      uses: EndBug/label-sync@v2
+      with:
+        config-file: ".github/labels-final.yml"
+        delete-other-labels: ${{ inputs.delete_other_labels }}
+        token: ${{ inputs.repo_token }}

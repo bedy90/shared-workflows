@@ -1,0 +1,29 @@
+name: "Module Commit Message"
+description: "Valide le titre de la PR selon les Conventional Commits"
+
+runs:
+  using: "composite"
+  steps:
+    - name: PR Title Validation (Conventional Commits)
+      if: github.event_name == 'pull_request'
+      shell: bash
+      run: |
+        TITLE="${{ github.event.pull_request.title }}"
+        REGEX="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.*\))?!?: .+$"
+        if [[ ! $TITLE =~ $REGEX ]]; then
+          echo "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
+          echo "❌ ACTION REQUISE : Format de titre de Pull Request invalide"
+          echo "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
+          echo "Titre actuel : '$TITLE'"
+          echo ""
+          echo "Pour garantir un patchnote automatique de qualité, merci d'utiliser le format :"
+          echo "  <type>: <description>"
+          echo ""
+          echo "Types autorisés : feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+          echo "Exemple : feat: add authentication system"
+          echo "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
+          # Informatif pour le moment
+          exit 0 
+        else
+          echo "✅ Le titre de la PR respecte les standards (Conventional Commits)."
+        fi

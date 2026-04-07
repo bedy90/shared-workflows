@@ -41,13 +41,15 @@ jobs:
 
 | Module | Description | Guide |
 | :--- | :--- | :--- |
-| **`pr-analysis`** | Orchestrateur complet (Sécurité, Qualité, Framework) | [Consulter](./WorkflowUserGuide.md#🕵️-pr-analysis-analyse-complète---recommandé) |
-| **`security`** | Audit Gitleaks, NPM Audit et Trivy (FS) | [Consulter](./WorkflowUserGuide.md#🛡️-sécurité-security-checkyml) |
-| **`quality`** | ESLint, Outdated et Case Check | [Consulter](./WorkflowUserGuide.md#🎨-linter-linter-checkyml) |
-| **`docker`** | Hadolint, Trivy (FS/Config) et Compose | [Consulter](./WorkflowUserGuide.md#🐳-docker-docker-checkyml) |
-| **`version`** | Contrôle incrément package.json + Tag Git | [Consulter](./WorkflowUserGuide.md#🏷️-contrôle-de-version) |
-| **`release-drafter`** | Brouillons de Release + Patchnote Pro | [Consulter](./WorkflowUserGuide.md#📝-release-drafter-release-drafteryml) |
+| **`pr-analysis`** | Orchestrateur complet (Sécurité, Qualité, Framework, Labels) | [Consulter](./WorkflowUserGuide.md#🕵️-pr-analysis-analyse-complète---recommandé) |
+| **`security`** | Audit Gitleaks, NPM Audit et Trivy (Vulnerabilités FS) | [Consulter](./WorkflowUserGuide.md#🛡️-sécurité-security-checkyml) |
+| **`quality`** | ESLint, Outdated, Case Check et Validation de Commits | [Consulter](./WorkflowUserGuide.md#🎨-linter-linter-checkyml) |
+| **`frameworks`** | Vérifications spécifiques Angular et Tests unitaires ViTest | [Consulter](./WorkflowUserGuide.md#🅰️-angular-angular-checkyml) |
+| **`docker`** | Hadolint, Trivy (Config) et Docker-Compose | [Consulter](./WorkflowUserGuide.md#🐳-docker-docker-checkyml) |
+| **`version`** | Contrôle d'incrément package.json + Validation de Tag | [Consulter](./WorkflowUserGuide.md#🏷️-contrôle-de-version) |
+| **`labels`** | Synchronisation auto des labels + Attribution auto (PR Labeler) | [Consulter](./WorkflowUserGuide.md#🏷️-labeler-labeler-checkyml) |
+| **`release`** | Brouillons de Release + Patchnote Pro automatisé | [Consulter](./WorkflowUserGuide.md#📝-release-drafter-release-drafteryml) |
 
 ---
 
-_Dernière mise à jour : Avril 2026 - Migration Node 24 terminée._
+_Dernière mise à jour : Avril 2026 - Migration Node 24 terminée._

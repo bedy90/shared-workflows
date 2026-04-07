@@ -8,6 +8,11 @@ on:
         required: false
         type: string
         default: ""
+      enable_labeler:
+        description: "Activer le PR Labeler et la synchronisation des labels"
+        required: false
+        type: boolean
+        default: false
     secrets:
       gitleaks_license:
         description: "Licence Gitleaks"
@@ -96,8 +101,20 @@ jobs:
           central_path: ".central-workflow"
           workflow_token: ${{ inputs.workflow_token || secrets.GITHUB_TOKEN }}
 
-      - name: Commit Lint Check
-        shell: bash
-        run: |
-          echo "Vérification des messages de commit (Placeholder)..."
-          echo "Cette étape est actuellement informative."
+      - name: PR Message Module
+        uses: ./.central-workflow/.github/actions/commit-msg
+
+      - name: 🔄 Sync Labels (Dual-Config)
+        if: inputs.enable_labeler == true
+        uses: ./.central-workflow/.github/actions/labels
+        with:
+          central_path: ".central-workflow"
+          delete_other_labels: false
+          repo_token: ${{ github.token }}
+
+      - name: PR Labeling Module
+        if: inputs.enable_labeler == true
+        uses: ./.central-workflow/.github/actions/labeler
+        with:
+          central_path: ".central-workflow"
+          repo_token: ${{ github.token }}

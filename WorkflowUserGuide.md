@@ -8,9 +8,11 @@ Ce guide détaille l'utilisation de chaque module disponible dans la bibliothèq
 
 Le workflow `pr-analysis.yml` est un orchestrateur optimisé qui exécute toutes les vérifications pertinentes (Angular, ViTest, ESLint, Sécurité) en un seul job pour gagner du temps.
 
-**Avantages :** 
+**Avantages :**
 - Un seul `npm install` (Optimisation du temps de build).
 - Détection automatique des technologies (Angular/ViTest).
+- Orchestration intelligente des Labels (**Sync + PR Labeler**).
+- **Dual-Config** : Support des fichiers locaux `.github/labels.yml` et `.github/labeler.yml` pour surcharger les standards de l'organisation.
 - Rapport global consolidé dans les commentaires de la PR.
 
 ```yaml
@@ -27,6 +29,8 @@ jobs:
       gitleaks_license: ${{ secrets.GITLEAKS_LICENSE }}
       # Option B : Héritage global (Simplifié)
       # secrets: inherit
+    with:
+      enable_labeler: true # Active la sync auto des labels + Attribution auto
 ```
 
 ---
@@ -49,6 +53,18 @@ Exécute ESLint sur l'ensemble du projet.
 ```yaml
 name: "Linter (ESLint)"
 uses: bedy90/shared-workflows/.github/workflows/linter-check.yml@dev
+```
+
+### ✍️ Validation des Messages (Conventional Commits)
+Vérifie que les titres de PR ou messages de commit respectent le format `type: description` (ex: `feat: add login`). Indispensable pour que le **Release Drafter** puisse générer le patchnote automatiquement.
+
+**Comment corriger un message invalide ?**
+- Si le titre de la PR est invalide : Éditez simplement le titre sur GitHub.
+- Si un commit est invalide : Faire un `git rebase -i` puis `reword` (Optionnel si vous utilisez **Squash & Merge**).
+
+```yaml
+name: "Commit Msg Check"
+uses: bedy90/shared-workflows/.github/workflows/commit-msg-check.yml@dev
 ```
 
 ### 🆙 Dépendances (`dependency-check.yml`)
@@ -78,11 +94,25 @@ with:
 
 ### 🏷️ Labeler (`labeler-check.yml`)
 Auto-labeling des PR **+** Synchronisation automatique des labels de l'organisation.
+
+**Fonctionnement Dual-Config :**
+- Si un fichier `.github/labels.yml` est présent localement, il est fusionné avec le standard. En cas de conflit (même nom), votre version **locale** l'emporte (couleur, description).
+- Idem pour `.github/labeler.yml` concernant les règles d'attribution.
+
 ```yaml
 name: "Labeler & Org Sync"
 uses: bedy90/shared-workflows/.github/workflows/labeler-check.yml@dev
 with:
   enable_labeler: true
+  delete_other_labels: false
+```
+
+### 🔄 Synchronisation des Labels (`label-sync.yml`)
+Si vous souhaitez uniquement synchroniser la liste des labels standards sans activer l'auto-labeling des PRs.
+```yaml
+name: "Label Sync Only"
+uses: bedy90/shared-workflows/.github/workflows/label-sync.yml@dev
+with:
   delete_other_labels: false
 ```
 
