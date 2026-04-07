@@ -20,7 +20,7 @@ runs:
     - name: Merge Label Configurations
       shell: bash
       run: |
-        CENTRAL_CONFIG="${{ env.GITHUB_WORKSPACE }}/${{ inputs.central_path }}/.github/configs/labels.yml"
+        CENTRAL_CONFIG="$GITHUB_WORKSPACE/${{ inputs.central_path }}/.github/configs/labels.yml"
         LOCAL_CONFIG=".github/labels.yml"
         FINAL_CONFIG=".github/labels-final.yml"
         

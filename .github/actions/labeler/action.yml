@@ -16,7 +16,7 @@ runs:
     - name: Merge Labeler Configurations
       shell: bash
       run: |
-        CENTRAL_CONFIG="${{ env.GITHUB_WORKSPACE }}/${{ inputs.central_path }}/.github/configs/labeler.yml"
+        CENTRAL_CONFIG="$GITHUB_WORKSPACE/${{ inputs.central_path }}/.github/configs/labeler.yml"
         LOCAL_CONFIG=".github/labeler.yml"
         FINAL_CONFIG=".github/labeler-final.yml"
         
