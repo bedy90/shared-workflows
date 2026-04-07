@@ -27,7 +27,7 @@ runs:
         if [ -f "$LOCAL_CONFIG" ]; then
           echo "🔎 Fusion avec la configuration locale..."
           # Utilisation de yq pour fusionner les deux listes en privilégiant le local (last wins)
-          yq eval-all '[.[]] | group_by(.name) | map(last)' "$CENTRAL_CONFIG" "$LOCAL_CONFIG" > "$FINAL_CONFIG"
+          yq eval-all '[.[]] | group_by(.name) | map(.[-1])' "$CENTRAL_CONFIG" "$LOCAL_CONFIG" > "$FINAL_CONFIG"
         else
           echo "ℹ️ Aucune configuration locale, usage standard."
           cp "$CENTRAL_CONFIG" "$FINAL_CONFIG"
