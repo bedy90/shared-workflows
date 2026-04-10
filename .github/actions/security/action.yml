@@ -57,19 +57,9 @@ runs:
           });
 
     - name: Secret Scan (Gitleaks)
-      shell: bash
+      uses: gitleaks/gitleaks-action@v2
       env:
         GITHUB_TOKEN: ${{ inputs.workflow_token || github.token }}
         GITLEAKS_LICENSE: ${{ inputs.gitleaks_license }}
-      run: |
-        curl -sSfL https://raw.githubusercontent.com/gitleaks/gitleaks/master/install.sh | bash -s -- -b $RUNNER_TEMP
-        $RUNNER_TEMP/gitleaks detect --source . -v || true
-
-    # V20
-    # - name: Secret Scan (Gitleaks)
-    #   uses: gitleaks/gitleaks-action@v2
-    #   env:
-    #     GITHUB_TOKEN: ${{ inputs.workflow_token || github.token }}
-    #     GITLEAKS_LICENSE: ${{ inputs.gitleaks_license }}
-    #   continue-on-error: true
+      continue-on-error: true
 
