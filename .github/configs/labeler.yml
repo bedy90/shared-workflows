@@ -1,5 +1,6 @@
 # Shared Labeler Configuration (Core)
 # This file is used as the base configuration for projects calling labeler-check.yml.
+# NOTE: Uses actions/labeler@v6 format (array of objects with 'changed-files').
 
 # -- Technical Areas --
 "area:angular":
