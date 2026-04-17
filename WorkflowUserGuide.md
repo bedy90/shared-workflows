@@ -107,6 +107,21 @@ with:
   delete_other_labels: false
 ```
 
+#### ⚠️ Format requis pour `.github/labeler.yml` (v6)
+
+Le module utilise `actions/labeler@v6`. Si vous surchargez ce fichier localement, vous **devez** utiliser le format de liste d'objets avec la clé `changed-files`. Une simple liste de chaînes de caractères provoquera une erreur.
+
+**Exemple de format valide :**
+```yaml
+"area:components":
+  - changed-files:
+    - any-glob-to-any-file: "src/components/**/*"
+
+"area:shared":
+  - changed-files:
+    - any-glob-to-any-file: ["src/shared/**/*", "libs/shared/**/*"]
+```
+
 ### 🔄 Synchronisation des Labels (`label-sync.yml`)
 Si vous souhaitez uniquement synchroniser la liste des labels standards sans activer l'auto-labeling des PRs.
 ```yaml
